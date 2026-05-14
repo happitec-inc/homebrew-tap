@@ -3,7 +3,7 @@ class PushoverNotify < Formula
   homepage "https://github.com/happitec-inc/pushover-notify"
   url "https://github.com/happitec-inc/pushover-notify.git",
       tag:      "v0.1.0",
-      revision: "91bef49fadf783cae594570cd7803b5f60c492cf"
+      revision: "bc50a014cab678560e647fb1a7151b249b80cae4"
   version "0.1.0"
 
   depends_on xcode: ["15.0", :build]
