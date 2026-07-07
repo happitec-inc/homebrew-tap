@@ -2,9 +2,9 @@ class PushoverNotify < Formula
   desc "Send Pushover notifications with optional image attachments"
   homepage "https://github.com/happitec-inc/pushover-notify"
   url "https://github.com/happitec-inc/pushover-notify.git",
-      tag:      "v0.1.0",
-      revision: "bc50a014cab678560e647fb1a7151b249b80cae4"
-  version "0.1.0"
+      tag:      "v0.2.1",
+      revision: "0915fd8808781efc97459776275b21cbd38a48c4"
+  version "0.2.1"
 
   depends_on xcode: ["15.0", :build]
   depends_on arch: :arm64
