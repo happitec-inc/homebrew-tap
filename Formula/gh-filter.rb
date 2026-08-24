@@ -2,9 +2,9 @@ class GhFilter < Formula
   desc "Allowlist shim for the gh CLI that refuses out-of-org invocations"
   homepage "https://github.com/happitec-inc/gh-filter"
   url "https://github.com/happitec-inc/gh-filter.git",
-      tag:      "v0.2.1",
-      revision: "06095e97bece013b6b8a34faef7b63b6ab0d2b6f"
-  version "0.2.1"
+      tag:      "v0.3.0",
+      revision: "7a4fcf88164b41b8d30a39c4fcf0702ebe3e8265"
+  version "0.3.0"
   license "MIT"
 
   head "https://github.com/happitec-inc/gh-filter.git", branch: "main"
