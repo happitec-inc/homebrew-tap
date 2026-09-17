@@ -2,9 +2,9 @@ class Displayctrl < Formula
   desc "macOS CLI for managing display mirroring and resolution"
   homepage "https://github.com/happitec-inc/displayctrl"
   url "https://github.com/happitec-inc/displayctrl.git",
-      tag:      "v0.1.0",
-      revision: "3b1a301968cfffca9cae3e0644077bf79b7d0f37"
-  version "0.1.0"
+      tag:      "v0.1.1",
+      revision: "4df3f770655833d4e2519116797d7bc9f88b60f2"
+  version "0.1.1"
   license "GPL-3.0-or-later"
 
   depends_on xcode: ["16.3", :build]
