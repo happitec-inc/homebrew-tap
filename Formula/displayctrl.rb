@@ -7,7 +7,7 @@ class Displayctrl < Formula
   version "0.1.0"
   license "GPL-3.0-or-later"
 
-  depends_on xcode: ["16.0", :build]
+  depends_on xcode: ["16.3", :build]
   depends_on arch: :arm64
   depends_on macos: :sonoma
 
