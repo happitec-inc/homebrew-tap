@@ -31,6 +31,16 @@ Source: [happitec-inc/gh-filter](https://github.com/happitec-inc/gh-filter)
 brew install happitec-inc/tap/gh-filter
 ```
 
+### displayctrl
+
+macOS CLI for managing display mirroring and resolution.
+
+Source: [happitec-inc/displayctrl](https://github.com/happitec-inc/displayctrl)
+
+```
+brew install happitec-inc/tap/displayctrl
+```
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
