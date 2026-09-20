@@ -1,6 +1,6 @@
 cask "displayctrl" do
-  version "0.2.1"
-  sha256 "37f8f20012e2671a547591c2a570d3364476606cafef24adddf6b7645c638a2a"
+  version "0.2.2"
+  sha256 "e8477d8ce75cc244493ac3ccc2508599a384b48291899060813104d46f7c4cae"
 
   url "https://github.com/happitec-inc/displayctrl/releases/download/v#{version}/displayctrl-v#{version}-macos.zip"
   name "DisplayControl"
