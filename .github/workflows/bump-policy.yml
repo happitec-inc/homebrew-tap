@@ -1,0 +1,116 @@
+name: Bump Policy
+# Content gate for tap bump PRs (happitec-inc/shared-actions#199).
+#
+# Ported from happitec-inc/homebrew-internal's copy of the same workflow. This
+# tap had NO workflows at all before this file: every PR merged on a single
+# approval with nothing reading the diff.
+#
+# Identity is not evidence. Every fleet agent authors as happitec-computer[bot],
+# so "the bot opened it on a bump/ branch" proves a machine opened the PR — not
+# that the diff is a bump. This one reads the diff and verifies the new pin
+# against the source repo.
+#
+# DELIBERATELY UNFILTERED. There is no `if:` on branch name or author, and no
+# path filter, and that is the point: a job skipped by a job-level `if` still
+# reports its check as satisfied to branch protection, so a name-based filter
+# would let any PR opt out of the gate by not calling its branch bump/*. Every
+# PR to this tap runs this check and passes on content or not at all.
+#
+# THREE VERDICTS, so this is safe to make required later:
+#
+#   PASS     exactly a bump, payload verified against the source repo. Green,
+#            and an approving review is posted by happitec-reviewer[bot].
+#   ABSTAIN  not a pure bump — a NEW formula or cask, a strategy change, a
+#            branch-pinned formula, extra content riding along. Green and
+#            SILENT: no approval, so the branch's review requirement still
+#            blocks the merge and a human supplies the review.
+#   FAIL     bump-shaped and the payload assertion is false. Red, hard block.
+#
+# The abstain path is what makes this eligible to become a REQUIRED check
+# without walling off new-artifact PRs (shared-actions#232). A new formula or
+# cask goes green-and-unapproved, not red.
+
+on:
+  pull_request:
+    # labeled/unlabeled included so toggling `allow-downgrade` re-runs the gate
+    # rather than leaving a stale red check on a deliberate rollback.
+    # `edited` catches a base-branch retarget, which otherwise leaves the
+    # previous run's conclusion standing against a diff it never saw.
+    types: [opened, synchronize, reopened, labeled, unlabeled, edited]
+
+permissions: {}
+
+concurrency:
+  group: "bump-policy-${{ github.event.pull_request.number }}"
+  cancel-in-progress: true
+
+jobs:
+  bump-policy:
+    name: bump-policy
+    runs-on: ${{ fromJson(vars.RUNNER_LINUX) }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Generate App token
+        id: app-token
+        # The default GITHUB_TOKEN is scoped to THIS repo (the tap). Verifying a
+        # pin means reading tags and release assets on the SOURCE repo, which is
+        # a different repo — hence an App token, scoped org-wide.
+        #
+        # The permission-* inputs are load-bearing, not decoration. With `owner:`
+        # alone this action mints a token carrying the App's ENTIRE installation
+        # permission set — contents, workflows, secrets and administration at
+        # write, plus org admin. A read-only content gate would then run holding
+        # a credential that can rewrite any repo in the org, and the comment
+        # above it would have said "contents: read" while it did.
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.GH_COMPUTER_APP_ID }}
+          private-key: ${{ secrets.GH_COMPUTER_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-contents: read
+          permission-metadata: read
+
+      - name: Generate review App token
+        id: review-token
+        # A SECOND identity, deliberately. The approving review this gate posts
+        # on a verified bump is what replaces `gh pr merge --admin`, and GitHub
+        # refuses self-review: these PRs are authored by happitec-computer[bot],
+        # so that App cannot approve them. happitec-reviewer[bot] is the
+        # identity-separated twin that can.
+        #
+        # `permission-pull-requests: write` is what lets the token POST a
+        # review. It is NOT a claim about what makes an approval COUNT toward
+        # branch protection — that is measured only as "this App's scope
+        # suffices" (shared-actions#190, #188) and has never been
+        # negative-controlled down to a single permission. Do not narrow this
+        # on the strength of that line.
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.GH_REVIEWER_APP_ID }}
+          private-key: ${{ secrets.GH_REVIEWER_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-pull-requests: write
+          permission-metadata: read
+
+      - name: Validate the bump
+        # Pinned, not @main. This action gates every PR to this tap, and once
+        # it can post approvals it is also part of what makes a merge legal.
+        # Floating on @main meant shared-actions' next merge changed this
+        # tap's behaviour the moment it landed, with nothing here choosing
+        # the timing. Bump this deliberately.
+        #
+        # shared-actions is PRIVATE and this tap is PUBLIC. The action ships as
+        # a COMPOSITE, so resolution goes through GitHub's private-action path,
+        # which honours shared-actions' org Actions access policy
+        # (access_level: organization) rather than repo visibility. No checkout
+        # of the private source repo, and no token, is needed here.
+        uses: happitec-inc/shared-actions/.github/actions/bump-policy@bump-policy-v1.1.0  # 982e2c66b5010a6f08593136618d8380e6d99933
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          # Supplying this turns a PASS verdict into a posted approving review.
+          # Omit it and the gate still runs and still blocks — it just never
+          # approves, which is what every caller got before this change.
+          review-token: ${{ steps.review-token.outputs.token }}
